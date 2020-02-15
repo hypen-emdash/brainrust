@@ -8,18 +8,15 @@ use num_traits::{
 use std::{
     collections::{HashMap, VecDeque},
     convert::From,
-    io,
-    io::{BufReader, BufWriter, Read, Write},
+    fs, io,
+    io::{Read, Write},
 };
 
 fn main() -> Result<(), Error> {
-    let program = "+++++ +++++ .[]";
+    let program_name = "examples/hello.bfk";
 
-    let mut machine = Machine::<_, _, u128>::new(
-        program.chars().map(|c| c.into()).collect(),
-        BufReader::new(io::stdin()),
-        BufWriter::new(io::stdout()),
-    );
+    let mut machine =
+        Machine::<_, _, u128>::new(read_program(program_name)?, io::stdin(), io::stdout());
     loop {
         match machine.step() {
             Ok(_) => {}
@@ -28,6 +25,13 @@ fn main() -> Result<(), Error> {
         };
     }
     Ok(())
+}
+
+fn read_program(path: &str) -> io::Result<Vec<Instruction>> {
+    Ok(fs::read_to_string(path)?
+        .chars()
+        .map(|c| c.into())
+        .collect())
 }
 
 #[derive(Debug)]
