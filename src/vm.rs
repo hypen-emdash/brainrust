@@ -5,23 +5,20 @@ use num_traits::{
     ops::wrapping::{WrappingAdd, WrappingSub},
     sign::Unsigned,
 };
+
 use std::{
     collections::{HashMap, VecDeque},
-    convert::From,
-    fs, io,
     io::{Read, Write},
 };
 
-pub fn read_program(path: &str) -> io::Result<Vec<Instruction>> {
-    Ok(fs::read_to_string(path)?
-        .chars()
-        .map(|c| c.into())
-        .collect())
-}
+use crate::{
+    error::Error,
+    interpret::{Instruction, Program},
+};
 
 #[derive(Debug)]
 pub struct Machine<R, W, I> {
-    program: Vec<Instruction>,
+    program: Program,
     instruction_ptr: usize,
     memory: VecDeque<I>,
     data_ptr: usize,
@@ -34,7 +31,7 @@ pub struct Machine<R, W, I> {
 impl<R: Read, W: Write, I: PrimInt + WrappingAdd + WrappingSub + FromPrimitive + Unsigned>
     Machine<R, W, I>
 {
-    pub fn new(program: Vec<Instruction>, input: R, output: W) -> Self {
+    pub fn new(program: Program, input: R, output: W) -> Self {
         use Instruction::*;
 
         let mut open_to_close = HashMap::new();
@@ -71,7 +68,7 @@ impl<R: Read, W: Write, I: PrimInt + WrappingAdd + WrappingSub + FromPrimitive +
     pub fn step(&mut self) -> Result<(), Error> {
         use Instruction::*;
 
-        let instruction = *self
+        let instruction = self
             .program
             .get(self.instruction_ptr)
             .ok_or(Error::ProgramComplete)?;
@@ -139,49 +136,5 @@ impl<R: Read, W: Write, I: PrimInt + WrappingAdd + WrappingSub + FromPrimitive +
         self.instruction_ptr += 1;
 
         Ok(())
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Instruction {
-    MoveRight,
-    MoveLeft,
-    Increment,
-    Decrement,
-    Write,
-    Read,
-    While,
-    WhileEnd,
-    Comment(char),
-}
-
-impl From<char> for Instruction {
-    fn from(c: char) -> Self {
-        use Instruction::*;
-        match c {
-            '>' => MoveRight,
-            '<' => MoveLeft,
-            '+' => Increment,
-            '-' => Decrement,
-            '.' => Write,
-            ',' => Read,
-            '[' => While,
-            ']' => WhileEnd,
-            _ => Comment(c),
-        }
-    }
-}
-
-#[derive(Debug)]
-pub enum Error {
-    ProgramComplete,
-    UnmatchedOpenBracket(usize),
-    UnmatchedCloseBracket(usize),
-    Io(io::Error),
-}
-
-impl From<io::Error> for Error {
-    fn from(e: io::Error) -> Self {
-        Error::Io(e)
     }
 }
