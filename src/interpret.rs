@@ -30,7 +30,7 @@ impl From<char> for Instruction {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Program(Vec<Instruction>);
 
 impl Program {
@@ -51,4 +51,15 @@ impl From<&str> for Program {
 
 pub fn read_program(path: &str) -> io::Result<Program> {
     Ok(fs::read_to_string(path)?.as_str().into())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn str_to_program() {
+        use Instruction::*;
+        assert_eq!(Program(vec![Read, Increment, While, Decrement, Write, Read, Increment, WhileEnd, MoveLeft, MoveRight]), ",+[-.,+]<>".into());
+    }
 }
