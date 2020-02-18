@@ -137,4 +137,31 @@ impl<R: Read, W: Write, I: PrimInt + WrappingAdd + WrappingSub + FromPrimitive +
 
         Ok(())
     }
+
+    pub fn run(mut self) -> Result<u64, Error> {
+        let mut time = 0;
+        loop {
+            time += 1;
+            match self.step() {
+                Ok(_) => {}
+                Err(Error::ProgramComplete) => break,
+                Err(e) => return Err(e),
+            }
+        }
+        Ok(time)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn cat() {
+        let input: &[u8] = &[47, 0, 38, 1, 200];
+        let mut output = Vec::new();
+        let m = Machine::<_, _, u16>::new(",+[-.,+]".into(), input, &mut output);
+        assert!(m.run().is_ok());
+        assert_eq!(input, output.as_slice());
+    }
 }

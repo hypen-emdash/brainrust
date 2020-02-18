@@ -56,10 +56,16 @@ pub fn read_program(path: &str) -> io::Result<Program> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn str_to_program() {
         use Instruction::*;
-        assert_eq!(Program(vec![Read, Increment, While, Decrement, Write, Read, Increment, WhileEnd, MoveLeft, MoveRight]), ",+[-.,+]<>".into());
+        assert_eq!(
+            Program(vec![
+                Read, Increment, While, Decrement, Write, Read, Increment, WhileEnd, MoveLeft,
+                MoveRight
+            ]),
+            ",+[-.,+]<>".into()
+        );
     }
 }
