@@ -43,14 +43,17 @@ impl Program {
     }
 }
 
-impl From<&str> for Program {
-    fn from(s: &str) -> Self {
-        Self(s.chars().map(|c| c.into()).collect())
+impl<T> From<T> for Program
+where
+    T: Iterator<Item = char>,
+{
+    fn from(s: T) -> Self {
+        Self(s.map(|c| c.into()).collect())
     }
 }
 
 pub fn read_program(path: &str) -> io::Result<Program> {
-    Ok(fs::read_to_string(path)?.as_str().into())
+    Ok(fs::read_to_string(path)?.chars().into())
 }
 
 #[cfg(test)]
@@ -65,7 +68,7 @@ mod tests {
                 Read, Increment, While, Decrement, Write, Read, Increment, WhileEnd, MoveLeft,
                 MoveRight
             ]),
-            ",+[-.,+]<>".into()
+            ",+[-.,+]<>".chars().into()
         );
     }
 }
