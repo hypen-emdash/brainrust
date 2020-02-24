@@ -1,12 +1,10 @@
 use std::io;
 
-mod error;
 mod interpret;
 mod vm;
 
-use error::Error;
 use interpret::read_program;
-use vm::Machine;
+use vm::{vm::Machine, Error};
 
 fn main() -> Result<(), Error> {
     let program_name = "examples/cat.bfk";
